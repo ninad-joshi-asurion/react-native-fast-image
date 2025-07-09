@@ -164,6 +164,19 @@ const resolveDefaultSource = (
     return defaultSource
 }
 
+const convertHeaderArrayToObject = (
+    headers?: Array<{ name?: string; value?: string }>
+    ): { [key: string]: string } => {
+    if (!Array.isArray(headers)) return {};
+ 
+    return headers.reduce((acc, item) => {
+        if (item && typeof item.name === 'string' && typeof item.value === 'string') {
+        acc[item.name] = item.value;
+        }
+        return acc;
+    }, {} as { [key: string]: string });
+};
+
 function FastImageBase({
     source,
     defaultSource,
@@ -228,7 +241,11 @@ function FastImageBase({
     const resolvedDefaultSource = resolveDefaultSource(defaultSource)
     const resolvedDefaultSourceAsString =
         resolvedDefaultSource !== null ? String(resolvedDefaultSource) : null
-
+    
+    if(Platform.OS === 'ios') {
+        modifiedSource.headers = convertHeaderArrayToObject(modifiedSource.headers);
+    }
+    
     return (
         <View style={[styles.imageContainer, style]} ref={forwardedRef}>
             <FastImageView
